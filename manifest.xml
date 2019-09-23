@@ -514,12 +514,12 @@
         </interface>
     </hal>
     <hal format="hidl">
-        <name>vendor.qti.ims.factory</name>
+        <name>vendor.qti.hardware.radio.internal.deviceinfo</name>
         <transport>hwbinder</transport>
         <version>1.0</version>
         <interface>
-            <name>IImsFactory</name>
-            <instance>default</instance>
+            <name>IDeviceInfo</name>
+            <instance>deviceinfo</instance>
         </interface>
     </hal>
     <hal format="hidl">
