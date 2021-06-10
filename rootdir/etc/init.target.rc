@@ -482,4 +482,7 @@ service vendor.hvdcp_opti /system/vendor/bin/hvdcp_opti
      class main
      user root
      group system wakelock
-     task_profiles ServiceCapacityLow
+
+on property:sys.boot_completed=1
+    # Enable EAS
+    write /proc/sys/kernel/sched_energy_aware 1
