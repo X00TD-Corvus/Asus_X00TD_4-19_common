@@ -408,8 +408,6 @@ public:
     void deleteAidingData(const GnssAidingData &data, uint32_t sessionId);
     void gnssUpdateXtraThrottleCommand(const bool enabled);
     std::vector<LocationError> gnssUpdateConfig(const std::string& oldMoServerUrl,
-            const std::string& moServerUrl,
-            const std::string& serverUrl,
             GnssConfig& gnssConfigRequested,
             GnssConfig& gnssConfigNeedEngineUpdate, size_t count = 0);
 
@@ -526,8 +524,6 @@ public:
     (
         const std::unordered_map<LocationQwesFeatureType, bool> &featureMap
     );
-    void reportPdnTypeFromWds(int pdnType, AGpsExtType agpsType, std::string apnName,
-            AGpsBearerType bearerType);
 
     /* ======== UTILITIES ================================================================= */
     bool needReportForGnssClient(const UlpLocation& ulpLocation,

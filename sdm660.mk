@@ -163,40 +163,28 @@ PRODUCT_PACKAGES += \
     qcom.fmradio \
     qcom.fmradio.xml
 
-# Gatekeeper
-PRODUCT_PACKAGES += \
-    android.hardware.gatekeeper@1.0.vendor
-
-# GPS
-PRODUCT_PACKAGES += \
-    android.hardware.gnss@2.1-impl-qti \
-    android.hardware.gnss@2.1-service-qti \
-    android.hardware.gnss@1.1.vendor \
-    android.hardware.gnss@2.1.vendor \
-    libbatching \
-    libgeofencing \
-    libgnss \
-    libgnsspps \
-    libsynergy_loc_api \
-    libgps.utils \
-    liblocation_api \
-    libsensorndkbridge \
-    libwifi-hal-ctrl
-
-PRODUCT_PACKAGES += \
-    apdr.conf \
-    gps.conf \
-    gnss_antenna_info.conf \
-    flp.conf \
-    izat.conf \
-    lowi.conf \
-    sap.conf \
-    xtwifi.conf
-
 # Health
 PRODUCT_PACKAGES += \
     android.hardware.health@2.1-impl \
     android.hardware.health@2.1-service
+
+# GPS
+$(call inherit-product, $(LOCAL_PATH)/gps/gps_vendor_product.mk)
+
+PRODUCT_PACKAGES += \
+    libsensorndkbridge \
+    libwifi-hal-ctrl
+
+PRODUCT_PACKAGES += \
+    gps.conf \
+    flp.conf
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/gps/apdr.conf:$(TARGET_COPY_OUT_VENDOR)/etc/apdr.conf \
+    $(LOCAL_PATH)/configs/gps/izat.conf:$(TARGET_COPY_OUT_VENDOR)/etc/izat.conf \
+    $(LOCAL_PATH)/configs/gps/lowi.conf:$(TARGET_COPY_OUT_VENDOR)/etc/lowi.conf \
+    $(LOCAL_PATH)/configs/gps/sap.conf:$(TARGET_COPY_OUT_VENDOR)/etc/sap.conf \
+    $(LOCAL_PATH)/configs/gps/xtwifi.conf:$(TARGET_COPY_OUT_VENDOR)/etc/xtwifi.conf
 
 # HIDL
 PRODUCT_PACKAGES += \

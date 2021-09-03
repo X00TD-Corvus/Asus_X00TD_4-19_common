@@ -77,8 +77,6 @@ static void agpsCloseResultCb (bool isSuccess, AGpsExtType agpsType, void* userD
 
 typedef const CdfwInterface* (*getCdfwInterface)();
 
-typedef void getPdnTypeFromWds(const std::string& apnName, std::function<void(int)> pdnCb);
-
 inline bool GnssReportLoggerUtil::isLogEnabled() {
     return (mLogLatency != nullptr);
 }
@@ -940,10 +938,8 @@ GnssAdapter::setConfig()
     gnssConfigRequested.blacklistedSvIds.assign(mBlacklistedSvIds.begin(),
                                                 mBlacklistedSvIds.end());
     mLocApi->sendMsg(new LocApiMsg(
-            [this, gpsConf, sapConf, oldMoServerUrl, moServerUrl,
-            serverUrl, gnssConfigRequested] () mutable {
-        gnssUpdateConfig(oldMoServerUrl, moServerUrl, serverUrl,
-                gnssConfigRequested, gnssConfigRequested);
+            [this, gpsConf, sapConf, oldMoServerUrl, gnssConfigRequested] () mutable {
+        gnssUpdateConfig(oldMoServerUrl, gnssConfigRequested, gnssConfigRequested);
 
         // set nmea mask type
         uint32_t mask = 0;
@@ -1031,7 +1027,6 @@ GnssAdapter::setConfig()
 }
 
 std::vector<LocationError> GnssAdapter::gnssUpdateConfig(const std::string& oldMoServerUrl,
-        const std::string& moServerUrl, const std::string& serverUrl,
         GnssConfig& gnssConfigRequested, GnssConfig& gnssConfigNeedEngineUpdate, size_t count) {
     loc_gps_cfg_s gpsConf = ContextBase::mGps_conf;
     size_t index = 0;
@@ -1040,6 +1035,9 @@ std::vector<LocationError> GnssAdapter::gnssUpdateConfig(const std::string& oldM
     if (count > 0) {
         errsList.insert(errsList.begin(), count, LOCATION_ERROR_SUCCESS);
     }
+
+    std::string serverUrl = getServerUrl();
+    std::string moServerUrl = getMoServerUrl();
 
     int serverUrlLen = serverUrl.length();
     int moServerUrlLen = moServerUrl.length();
@@ -1432,8 +1430,7 @@ GnssAdapter::gnssUpdateConfigCommand(const GnssConfig& config)
             std::string serverUrl = adapter.getServerUrl();
             mApi.sendMsg(new LocApiMsg(
                     [&adapter, gnssConfigRequested, gnssConfigNeedEngineUpdate,
-                    moServerUrl, serverUrl, countOfConfigs, configCollectiveResponse,
-                    errs] () mutable {
+                    countOfConfigs, configCollectiveResponse, errs] () mutable {
                 std::vector<LocationError> errsList = adapter.gnssUpdateConfig("",
                         moServerUrl, serverUrl,
                         gnssConfigRequested, gnssConfigNeedEngineUpdate, countOfConfigs);
@@ -5313,7 +5310,8 @@ void GnssAdapter::dataConnOpenCommand(
     };
     // Added inital length checks for apnlen check to avoid security issues
     // In case of failure reporting the same
-    if (NULL == apnName || apnLen > MAX_APN_LEN || (strlen(apnName) != apnLen)) {
+    if (NULL == apnName || apnLen <= 0 || apnLen > MAX_APN_LEN ||
+            (strlen(apnName) != (unsigned)apnLen)) {
         LOC_LOGe("%s]: incorrect apnlen length or incorrect apnName", __func__);
         mAgpsManager.reportAtlClosed(agpsType);
     } else {
@@ -6787,9 +6785,7 @@ GnssAdapter::reportGnssAntennaInformation(const antennaInfoCb antennaInfoCallbac
         }
         gnssAntennaInformations.push_back(std::move(gnssAntennaInfo));
     }
-    if (antennaInfoVectorSize > 0) {
-        antennaInfoCallback(gnssAntennaInformations);
-    }
+    antennaInfoCallback(gnssAntennaInformations);
 }
 
 /* ==== DGnss Usable Reporter ========================================================= */
@@ -6826,15 +6822,10 @@ void GnssAdapter::enablePPENtripStreamCommand(const GnssNtripConnectionParams& p
                                               bool enableRTKEngine) {
 
     (void)enableRTKEngine; //future parameter, not used
-    if (0 == params.size || params.hostNameOrIp.empty() || params.mountPoint.empty() ||
-            params.username.empty() || params.password.empty()) {
-        LOC_LOGe("Ntrip parameters are invalid!");
-        return;
-    }
 
     struct enableNtripMsg : public LocMsg {
         GnssAdapter& mAdapter;
-        const GnssNtripConnectionParams mParams;
+        const GnssNtripConnectionParams& mParams;
 
         inline enableNtripMsg(GnssAdapter& adapter,
                 const GnssNtripConnectionParams& params) :
