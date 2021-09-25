@@ -228,7 +228,7 @@ PRODUCT_PACKAGES += \
 
 # Lights
 PRODUCT_PACKAGES += \
-    android.hardware.light@2.0-service.asus_sdm660
+    android.hardware.lights-service.asus_sdm660
 
 # LiveDisplay native
 PRODUCT_PACKAGES += \
